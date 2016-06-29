@@ -10,6 +10,7 @@ import sys
 
 import Adafruit_DHT
 
+######led###################
 #gpio's :
 SCLK = 12
 DIN = 16
@@ -123,7 +124,10 @@ def lcd_data(c):
   #print ("data sent :",hex(c))
   GPIO.output(DC, True)
   SPI(c)
-  
+
+begin(0xbc) # contrast - may need tweaking for each display
+
+######serial###################
 ser=serial.Serial(
     port='/dev/ttyUSB1',  #set port
     baudrate = 38400,   #ser baud rate
@@ -132,13 +136,10 @@ ser=serial.Serial(
     bytesize=serial.EIGHTBITS,
     timeout=1
   )
-begin(0xbc) # contrast - may need tweaking for each display
 print "Whether the serial is open:", ser.isOpen()
 
+######gps###################
 session = gps(mode=WATCH_ENABLE)
-
-
-    #report = session.next()
 
 try:
         while True:
@@ -151,15 +152,16 @@ try:
                 if report['class'] == 'WATCH':
                         print 'search satellite suc.'
 
+##DHT11
                 humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT11, 7)
 
                 if humidity is not None and temperature is not None:
                         print('Temp={0:0.1f}*  Humidity={1:0.1f}%'.format(temperature, humidity))
-
+##GPS
                         if report['class'] == 'TPV':
                             print 'latitude    ' , report.lat
                             print 'longitude   ' , report.lon
-
+##数据传输
                             humi = int(humidity) #4 bytes humidity
                             temp = int(temperature)
                             start = 0xFD
@@ -170,7 +172,7 @@ try:
                             ew =0
                             latitude = report.lat
                             ns = 3
-
+##lcd显示
                             longi=int(longitude)
                             latit=int(latitude)
                             gotoxy(0,0)
